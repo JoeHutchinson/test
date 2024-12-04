@@ -18,86 +18,65 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Calculate expected hash
-        id: hash
+      - name: Detect repository languages
+        id: detect-languages
         run: |
-          EXPECTED_CONTENT='# Please see the documentation for all configuration options:
-          # https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
+          # Initialize variables for each ecosystem
+          HAS_CSHARP=false
+          HAS_JS=false
+          HAS_DOCKER=false
+          HAS_PYTHON=false
+          HAS_TERRAFORM=false
           
+          # Check for C# files
+          if find . -type f -name "*.cs" -o -name "*.csproj" | grep -q .; then
+            HAS_CSHARP=true
+          fi
+          
+          # Check for JavaScript/Node.js files
+          if find . -type f -name "*.js" -o -name "package.json" | grep -q .; then
+            HAS_JS=true
+          fi
+          
+          # Check for Docker files
+          if find . -type f -name "Dockerfile" -o -name "*.dockerfile" | grep -q .; then
+            HAS_DOCKER=true
+          fi
+          
+          # Check for Python files
+          if find . -type f -name "*.py" -o -name "requirements.txt" | grep -q .; then
+            HAS_PYTHON=true
+          fi
+          
+          # Check for Terraform files
+          if find . -type f -name "*.tf" | grep -q .; then
+            HAS_TERRAFORM=true
+          fi
+          
+          # Set outputs
+          echo "has_csharp=$HAS_CSHARP" >> $GITHUB_OUTPUT
+          echo "has_js=$HAS_JS" >> $GITHUB_OUTPUT
+          echo "has_docker=$HAS_DOCKER" >> $GITHUB_OUTPUT
+          echo "has_python=$HAS_PYTHON" >> $GITHUB_OUTPUT
+          echo "has_terraform=$HAS_TERRAFORM" >> $GITHUB_OUTPUT
+
+      - name: Generate dependabot configuration
+        id: generate-config
+        run: |
+          # Start with base configuration
+          cat > .github/dependabot.yml << 'EOL'
+          # Please see the documentation for all configuration options:
+          # https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
+
           version: 2
           updates:
-            # NuGet dependencies
-            - package-ecosystem: "nuget"
-              directory: "**/*"
-              schedule:
-                interval: "weekly"
-                day: "monday"
-                time: "09:00"
-                timezone: "Europe/London"
-              open-pull-requests-limit: 1
-              groups:
-                patch-and-minor:
-                  patterns:
-                    - "*"
-                  update-types:
-                    - "minor"
-                    - "patch"
-              labels:
-                - "dependencies"
-                - "nuget"
-              ignore:
-                - dependency-name: "*"
-                  update-types: ["version-update:semver-major"]
-
-            # npm dependencies
-            - package-ecosystem: "npm"
-              directory: "**/*"
-              schedule:
-                interval: "weekly"
-                day: "monday"
-                time: "09:00"
-                timezone: "Europe/London"
-              open-pull-requests-limit: 1
-              groups:
-                patch-and-minor:
-                  patterns:
-                    - "*"
-                  update-types:
-                    - "minor"
-                    - "patch"
-              labels:
-                - "dependencies"
-                - "npm"
-              ignore:
-                - dependency-name: "*"
-                  update-types: ["version-update:semver-major"]
-
-            # Docker dependencies
-            - package-ecosystem: "docker"
-              directory: "**/*"
-              schedule:
-                interval: "weekly"
-                day: "monday"
-                time: "09:00"
-                timezone: "Europe/London"
-              open-pull-requests-limit: 1
-              groups:
-                patch-and-minor:
-                  patterns:
-                    - "*"
-                  update-types:
-                    - "minor"
-                    - "patch"
-              labels:
-                - "dependencies"
-                - "docker"
-              ignore:
-                - dependency-name: "*"
-                  update-types: ["version-update:semver-major"]
-
+          EOL
+          
+          # GitHub Actions (always included)
+          cat >> .github/dependabot.yml << 'EOL'
             # GitHub Actions
             - package-ecosystem: "github-actions"
-              directory: "**/*"
+              directory: "/"
               schedule:
                 interval: "weekly"
                 day: "monday"
@@ -117,10 +96,106 @@ jobs:
               ignore:
                 - dependency-name: "*"
                   update-types: ["version-update:semver-major"]
+          EOL
+
+          # Add NuGet if C# is detected
+          if [ "${{ steps.detect-languages.outputs.has_csharp }}" = "true" ]; then
+            cat >> .github/dependabot.yml << 'EOL'
+
+            # NuGet dependencies
+            - package-ecosystem: "nuget"
+              directories:
+                - "*"
+              schedule:
+                interval: "weekly"
+                day: "monday"
+                time: "09:00"
+                timezone: "Europe/London"
+              open-pull-requests-limit: 1
+              groups:
+                patch-and-minor:
+                  patterns:
+                    - "*"
+                  update-types:
+                    - "minor"
+                    - "patch"
+              labels:
+                - "dependencies"
+                - "nuget"
+              ignore:
+                - dependency-name: "*"
+                  update-types: ["version-update:semver-major"]
+          EOL
+          fi
+
+          # Add npm if JavaScript is detected
+          if [ "${{ steps.detect-languages.outputs.has_js }}" = "true" ]; then
+            cat >> .github/dependabot.yml << 'EOL'
+
+            # npm dependencies
+            - package-ecosystem: "npm"
+              directories:
+                - "*"
+              schedule:
+                interval: "weekly"
+                day: "monday"
+                time: "09:00"
+                timezone: "Europe/London"
+              open-pull-requests-limit: 1
+              groups:
+                patch-and-minor:
+                  patterns:
+                    - "*"
+                  update-types:
+                    - "minor"
+                    - "patch"
+              labels:
+                - "dependencies"
+                - "npm"
+              ignore:
+                - dependency-name: "*"
+                  update-types: ["version-update:semver-major"]
+          EOL
+          fi
+
+          # Add Docker if Dockerfile is detected
+          if [ "${{ steps.detect-languages.outputs.has_docker }}" = "true" ]; then
+            cat >> .github/dependabot.yml << 'EOL'
+
+            # Docker dependencies
+            - package-ecosystem: "docker"
+              directories:
+                - "*"
+              schedule:
+                interval: "weekly"
+                day: "monday"
+                time: "09:00"
+                timezone: "Europe/London"
+              open-pull-requests-limit: 1
+              groups:
+                patch-and-minor:
+                  patterns:
+                    - "*"
+                  update-types:
+                    - "minor"
+                    - "patch"
+              labels:
+                - "dependencies"
+                - "docker"
+              ignore:
+                - dependency-name: "*"
+                  update-types: ["version-update:semver-major"]
+          EOL
+          fi
+
+          # Add pip if Python is detected
+          if [ "${{ steps.detect-languages.outputs.has_python }}" = "true" ]; then
+            cat >> .github/dependabot.yml << 'EOL'
 
             # Python (pip) dependencies
             - package-ecosystem: "pip"
-              directory: "**/*"
+              directories:
+                - "*"
               schedule:
                 interval: "weekly"
                 day: "monday"
@@ -140,10 +215,17 @@ jobs:
               ignore:
                 - dependency-name: "*"
                   update-types: ["version-update:semver-major"]
+          EOL
+          fi
+
+          # Add Terraform if HCL is detected
+          if [ "${{ steps.detect-languages.outputs.has_terraform }}" = "true" ]; then
+            cat >> .github/dependabot.yml << 'EOL'
 
             # Terraform dependencies
             - package-ecosystem: "terraform"
-              directory: "**/*"
+              directories:
+                - "*"
               schedule:
                 interval: "weekly"
                 day: "monday"
@@ -162,81 +244,44 @@ jobs:
                 - "terraform"
               ignore:
                 - dependency-name: "*"
-                  update-types: ["version-update:semver-major"]'
-          
-          echo "EXPECTED_CONTENT<<EOF" >> $GITHUB_ENV
-          echo "$EXPECTED_CONTENT" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
-          
-          EXPECTED_HASH=$(echo "$EXPECTED_CONTENT" | sha256sum | cut -d' ' -f1)
-          echo "expected=$EXPECTED_HASH" >> $GITHUB_OUTPUT
-          
-          if [ -f ".github/dependabot.yml" ]; then
-            CURRENT_HASH=$(cat .github/dependabot.yml | sha256sum | cut -d' ' -f1)
-            echo "current=$CURRENT_HASH" >> $GITHUB_OUTPUT
-          else
-            echo "current=none" >> $GITHUB_OUTPUT
+                  update-types: ["version-update:semver-major"]
+          EOL
           fi
 
-      - name: Create or update dependabot.yml
-        id: create-dependabot
-        if: steps.hash.outputs.current != steps.hash.outputs.expected
-        run: |
-          mkdir -p .github
-          echo "$EXPECTED_CONTENT" > .github/dependabot.yml
-
           BRANCH_NAME="feature/update-dependabot-config-$(date +%s)"
+          git checkout -b $BRANCH_NAME
+          git add .github/dependabot.yml
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git commit -m "chore: Add language-specific dependabot.yml configuration"
+          git push origin $BRANCH_NAME
           echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
 
       - name: Create Pull Request
-        if: steps.hash.outputs.current != steps.hash.outputs.expected
         uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ github.token }}
-          title: "Add or update dependabot.yml configuration"
+          title: "Add language-specific dependabot.yml configuration"
           body: |
-            This PR adds or updates the dependabot.yml configuration file to ensure automated dependency updates are properly configured.
+            This PR adds a dependabot.yml configuration file based on the detected languages in your repository.
             
-            ## Configuration Details
+            ## Detected Languages and Ecosystems:
+            ${{ steps.detect-languages.outputs.has_csharp == 'true' && '- C# (NuGet)' || '' }}
+            ${{ steps.detect-languages.outputs.has_js == 'true' && '- JavaScript/Node.js (npm)' || '' }}
+            ${{ steps.detect-languages.outputs.has_docker == 'true' && '- Docker' || '' }}
+            ${{ steps.detect-languages.outputs.has_python == 'true' && '- Python (pip)' || '' }}
+            ${{ steps.detect-languages.outputs.has_terraform == 'true' && '- Terraform' || '' }}
+            - GitHub Actions (always included)
             
-            Common settings across all ecosystems:
+            ### Configuration Details:
             - Weekly updates every Monday at 09:00 (Europe/London)
-            - Maximum of 1 open PR at a time
+            - Maximum of 1 open PR at a time per ecosystem
             - Groups patch and minor updates together
             - Ignores major version updates
-            - Adds ecosystem-specific labels
+            - Ecosystem-specific labels for better visibility
             
-            ### Configured Package Ecosystems:
-            
-            1. **NuGet (.NET)**
-               - Label: `dependencies`, `nuget`
-               - Updates all dependencies
-            
-            2. **npm (Node.js)**
-               - Label: `dependencies`, `npm`
-               - Updates all dependencies
-            
-            3. **Docker**
-               - Label: `dependencies`, `docker`
-               - Updates all container images
-            
-            4. **GitHub Actions**
-               - Label: `dependencies`, `github-actions`
-               - Updates all workflow actions
-            
-            5. **Python (pip)**
-               - Label: `dependencies`, `pip`
-               - Updates all Python packages
-            
-            6. **Terraform**
-               - Label: `dependencies`, `terraform`
-               - Updates all providers and modules
-            
-            ### Update Strategy
-            - Groups updates by patch and minor versions to reduce PR noise
-            - Major version updates are excluded to prevent breaking changes
-            - Each ecosystem has its own label for better visibility
-          branch: ${{ steps.create-dependabot.outputs.branch_name }}
+            The configuration will help keep your dependencies up-to-date while maintaining stability by avoiding major version updates.
+          branch: ${{ steps.generate-config.outputs.branch_name }}
           base: main
           delete-branch: true
           labels: |
