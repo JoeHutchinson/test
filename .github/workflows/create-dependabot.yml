@@ -182,23 +182,8 @@ jobs:
         id: create-dependabot
         if: steps.hash.outputs.current != steps.hash.outputs.expected
         run: |
-          # Create a new branch
-          BRANCH_NAME="feature/update-dependabot-config-$(date +%s)"
-          # git checkout -b $BRANCH_NAME
-          
           mkdir -p .github
           echo "$EXPECTED_CONTENT" > .github/dependabot.yml
-
-          # git config --global user.email "joe@joe.com"
-          # git config --global user.name "Joe"
-          
-          # Stage and commit the changes
-          # git add .github/dependabot.yml
-          # git commit -m "Add or update dependabot.yml configuration"
-          
-          # Push the branch
-          # git push -u origin $BRANCH_NAME
-          echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
 
       - name: Create Pull Request
         if: steps.hash.outputs.current != steps.hash.outputs.expected
@@ -248,8 +233,9 @@ jobs:
             - Groups updates by patch and minor versions to reduce PR noise
             - Major version updates are excluded to prevent breaking changes
             - Each ecosystem has its own label for better visibility
-          branch: ${{ steps.create-dependabot.outputs.branch_name }}
+          branch: "feature/update-dependabot-config-$(date +%s)"
           base: main
+          delete-branch: true
           labels: |
             automation
             dependabot
