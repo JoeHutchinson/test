@@ -185,6 +185,9 @@ jobs:
           mkdir -p .github
           echo "$EXPECTED_CONTENT" > .github/dependabot.yml
 
+          BRANCH_NAME="feature/update-dependabot-config-$(date +%s)"
+          echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
+
       - name: Create Pull Request
         if: steps.hash.outputs.current != steps.hash.outputs.expected
         uses: peter-evans/create-pull-request@v7
@@ -233,7 +236,7 @@ jobs:
             - Groups updates by patch and minor versions to reduce PR noise
             - Major version updates are excluded to prevent breaking changes
             - Each ecosystem has its own label for better visibility
-          branch: ${{ "feature/update-dependabot-config-$(date +%s)" }}
+          branch: ${{ steps.create-dependabot.outputs.branch_name }}
           base: main
           delete-branch: true
           labels: |
