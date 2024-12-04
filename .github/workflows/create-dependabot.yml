@@ -233,7 +233,7 @@ jobs:
             - Groups updates by patch and minor versions to reduce PR noise
             - Major version updates are excluded to prevent breaking changes
             - Each ecosystem has its own label for better visibility
-          branch: "feature/update-dependabot-config-$(date +%s)"
+          branch: ${{ "feature/update-dependabot-config-$(date +%s)" }}
           base: main
           delete-branch: true
           labels: |
