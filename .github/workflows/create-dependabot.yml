@@ -197,7 +197,7 @@ jobs:
           git commit -m "Add or update dependabot.yml configuration"
           
           # Push the branch
-          # git push origin $BRANCH_NAME
+          git push origin $BRANCH_NAME
           echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
 
       - name: Create Pull Request
