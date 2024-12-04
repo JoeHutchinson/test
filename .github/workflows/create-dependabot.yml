@@ -187,6 +187,9 @@ jobs:
           
           mkdir -p .github
           echo "$EXPECTED_CONTENT" > .github/dependabot.yml
+
+          git config --global user.email "joe@joe.com"
+          git config --global user.name "Joe"
           
           # Stage and commit the changes
           git add .github/dependabot.yml
