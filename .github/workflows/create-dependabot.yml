@@ -189,6 +189,10 @@ jobs:
           mkdir -p .github
           echo "$EXPECTED_CONTENT" >> .github/dependabot.yml
 
+          echo "directory"
+
+          ls
+
           git config --global user.email "joe@joe.com"
           git config --global user.name "Joe"
           
