@@ -179,6 +179,7 @@ jobs:
           fi
 
       - name: Create or update dependabot.yml
+        id: create-dependabot
         if: steps.hash.outputs.current != steps.hash.outputs.expected
         run: |
           # Create a new branch
