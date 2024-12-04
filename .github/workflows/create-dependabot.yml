@@ -249,6 +249,7 @@ jobs:
             - Major version updates are excluded to prevent breaking changes
             - Each ecosystem has its own label for better visibility
           branch: ${{ steps.create-dependabot.outputs.branch_name }}
+          base: main
           labels: |
             automation
             dependabot
