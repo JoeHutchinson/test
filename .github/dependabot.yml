@@ -5,7 +5,7 @@ version: 2
 updates:
   # NuGet dependencies
   - package-ecosystem: "nuget"
-    directory: "**/*"
+    directory: "*"
     schedule:
       interval: "weekly"
       day: "monday"
@@ -28,7 +28,7 @@ updates:
 
   # npm dependencies
   - package-ecosystem: "npm"
-    directory: "**/*"
+    directory: "*"
     schedule:
       interval: "weekly"
       day: "monday"
@@ -51,7 +51,7 @@ updates:
 
   # Docker dependencies
   - package-ecosystem: "docker"
-    directory: "**/*"
+    directory: "*"
     schedule:
       interval: "weekly"
       day: "monday"
@@ -74,7 +74,7 @@ updates:
 
   # GitHub Actions
   - package-ecosystem: "github-actions"
-    directory: "**/*"
+    directory: "*"
     schedule:
       interval: "weekly"
       day: "monday"
@@ -97,7 +97,7 @@ updates:
 
   # Python (pip) dependencies
   - package-ecosystem: "pip"
-    directory: "**/*"
+    directory: "*"
     schedule:
       interval: "weekly"
       day: "monday"
@@ -120,7 +120,7 @@ updates:
 
   # Terraform dependencies
   - package-ecosystem: "terraform"
-    directory: "**/*"
+    directory: "*"
     schedule:
       interval: "weekly"
       day: "monday"
