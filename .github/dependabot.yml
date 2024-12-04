@@ -78,7 +78,7 @@ updates:
   # GitHub Actions
   - package-ecosystem: "github-actions"
     directories:
-      - ".github/*"
+      - "/"
     schedule:
       interval: "weekly"
       day: "monday"
