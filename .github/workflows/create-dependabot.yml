@@ -184,20 +184,20 @@ jobs:
         run: |
           # Create a new branch
           BRANCH_NAME="feature/update-dependabot-config-$(date +%s)"
-          git checkout -b $BRANCH_NAME
+          # git checkout -b $BRANCH_NAME
           
           mkdir -p .github
           echo "$EXPECTED_CONTENT" > .github/dependabot.yml
 
-          git config --global user.email "joe@joe.com"
-          git config --global user.name "Joe"
+          # git config --global user.email "joe@joe.com"
+          # git config --global user.name "Joe"
           
           # Stage and commit the changes
-          git add .github/dependabot.yml
-          git commit -m "Add or update dependabot.yml configuration"
+          # git add .github/dependabot.yml
+          # git commit -m "Add or update dependabot.yml configuration"
           
           # Push the branch
-          git push -u origin $BRANCH_NAME
+          # git push -u origin $BRANCH_NAME
           echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
 
       - name: Create Pull Request
