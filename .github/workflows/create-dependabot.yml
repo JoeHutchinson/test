@@ -189,10 +189,6 @@ jobs:
           mkdir -p .github
           echo "$EXPECTED_CONTENT" > .github/dependabot.yml
 
-          echo "directory"
-
-          ls
-
           git config --global user.email "joe@joe.com"
           git config --global user.name "Joe"
           
@@ -201,7 +197,7 @@ jobs:
           git commit -m "Add or update dependabot.yml configuration"
           
           # Push the branch
-          git push origin $BRANCH_NAME
+          git push -u origin $BRANCH_NAME
           echo "branch_name=$BRANCH_NAME" >> $GITHUB_OUTPUT
 
       - name: Create Pull Request
