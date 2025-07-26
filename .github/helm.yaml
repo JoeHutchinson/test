@@ -1,0 +1,24 @@
+name: Helm Lint
+
+on:
+  push:
+    paths:
+      - 'deploy/helm/**'
+
+jobs:
+  lint:
+    runs-on: warp-custom-vega-ci-small
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.sha }}
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: 'v3.17.1'
+
+      - name: Run Helm Lint
+        run: helm lint deploy/helm --set image.repository=your-repository --set image.tag=your-tag
